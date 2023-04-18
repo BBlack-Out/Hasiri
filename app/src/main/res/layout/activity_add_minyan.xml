@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AddMinyan"
+    tools:layout_editor_absoluteX="15dp"
+    tools:layout_editor_absoluteY="1dp">
+
+    <Button
+        android:id="@+id/Back"
+        android:layout_width="57dp"
+        android:layout_height="65dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:onClick="OnClick"
+        android:text="❮"
+        android:textColor="@color/white"
+        android:textSize="25dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="200dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/ragil"
+        android:gravity="center_horizontal"
+        android:text="צור מניין"
+        android:textColor="@color/cyan"
+        android:textSize="50dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map_view"
+        android:layout_width="327dp"
+        android:layout_height="211dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_view"
+        tools:context=".MapsActivity" />
+
+    <Button
+        android:id="@+id/TimePickerButton"
+        android:layout_width="171dp"
+        android:layout_height="62dp"
+        android:layout_marginTop="220dp"
+        android:fontFamily="@font/ragil"
+        android:onClick="popTimePicker"
+        android:text="בחר שעה"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:textSize="25dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_view" />
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/search_view"
+        android:layout_width="280dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="24dp"
+        android:background="@color/white"
+        android:elevation="5dp"
+        app:iconifiedByDefault="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.717"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:queryHint="עיר, שכונה, רחוב, מ''ס בית" />
+
+    <ImageButton
+        android:id="@+id/Arvit"
+        android:layout_width="106dp"
+        android:layout_height="62dp"
+        android:layout_marginTop="456dp"
+        android:layout_marginEnd="4dp"
+        android:background="#E6E6E6"
+        android:onClick="OnClick"
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toStartOf="@+id/Minha"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/arvit" />
+
+    <ImageButton
+        android:id="@+id/Shaharit"
+        android:layout_width="106dp"
+        android:layout_height="62dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="456dp"
+        android:background="#E6E6E6"
+        android:onClick="OnClick"
+        android:scaleType="fitCenter"
+        app:layout_constraintStart_toEndOf="@+id/Minha"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/saharit" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="56dp"
+        android:fontFamily="@font/dati"
+        android:text="שחרית"
+        android:textSize="20dp"
+        app:layout_constraintStart_toEndOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/Shaharit" />
+
+    <ImageButton
+        android:id="@+id/Minha"
+        android:layout_width="106dp"
+        android:layout_height="62dp"
+        android:layout_marginTop="18dp"
+        android:background="#E6E6E6"
+        android:onClick="OnClick"
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TimePickerButton"
+        app:srcCompat="@drawable/minha" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/dati"
+        android:text="מנחה"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Minha" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="60dp"
+        android:fontFamily="@font/dati"
+        android:text="ערבית"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toStartOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/Arvit" />
+
+    <EditText
+        android:id="@+id/heara"
+        android:layout_width="353dp"
+        android:layout_height="54dp"
+        android:layout_marginTop="16dp"
+        android:hint="הערה"
+
+        android:maxLength="40"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+    <Button
+        android:id="@+id/tzor"
+        android:layout_width="202dp"
+        android:layout_height="54dp"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/ragil"
+        android:onClick="OnClick"
+        android:text="צור מניין"
+        android:textColor="@color/white"
+        android:textSize="25dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/heara" />
+
+    <ImageButton
+        android:id="@+id/MyLocation"
+        android:layout_width="47dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="24dp"
+        android:background="@color/cyan"
+        android:onClick="OnClick"
+        android:scaleType="fitCenter"
+        android:src="@drawable/mylocation"
+        app:layout_constraintEnd_toStartOf="@+id/search_view"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

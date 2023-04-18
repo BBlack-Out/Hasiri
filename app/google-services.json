@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "906198872179",
+    "project_id": "hasiri-375617",
+    "storage_bucket": "hasiri-375617.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:906198872179:android:db218dfc9b3c2282b13a06",
+        "android_client_info": {
+          "package_name": "com.example.hasiri"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "906198872179-ltbht1sg1i9toro9slmvmgvdo37016ou.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPpiU5ICJZKBhV7Chy59JWtsUCh4lxMNg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "906198872179-ltbht1sg1i9toro9slmvmgvdo37016ou.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

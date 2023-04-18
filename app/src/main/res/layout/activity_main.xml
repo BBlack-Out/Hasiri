@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+
+  <RelativeLayout
+      android:id="@+id/Relative"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/white"
+        android:elevation="5dp"
+        app:iconifiedByDefault="false"
+        app:queryHint="כתובת" />
+  </RelativeLayout>
+
+  <com.google.android.gms.maps.MapView
+      android:id="@+id/map_view"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_alignParentStart="true"
+      android:layout_alignParentTop="true"
+      android:layout_marginTop="55dp"
+      android:layout_marginBottom="80dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/Relative"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_bias="0.958"
+      tools:context=".MapsActivity" />
+
+
+  <ImageButton
+      android:id="@+id/AddMinyan"
+      android:layout_width="113dp"
+      android:layout_height="56dp"
+      android:background="@color/white"
+      android:onClick="OnClick"
+      android:scaleType="fitCenter"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/map_view"
+      app:srcCompat="@drawable/addminyan" />
+
+  <TextView
+      android:id="@+id/textView2"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="פתח מניין"
+      android:fontFamily="@font/ragil"
+      android:textColor="#588CAF"
+      android:textSize="16dp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/AddMinyan" />
+
+  <ImageButton
+      android:id="@+id/SearchMinyan"
+      android:layout_width="113dp"
+      android:layout_height="56dp"
+      android:layout_marginStart="20dp"
+      android:background="@color/white"
+      android:onClick="OnClick"
+      android:scaleType="fitCenter"
+      app:layout_constraintStart_toEndOf="@+id/AddMinyan"
+      app:layout_constraintTop_toBottomOf="@+id/map_view"
+      app:srcCompat="@drawable/search"
+      tools:layout_editor_absoluteY="651dp" />
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="68dp"
+      android:fontFamily="@font/ragil"
+      android:text="חפש מניין"
+      android:textColor="#588CAF"
+      android:textSize="16dp"
+      app:layout_constraintStart_toEndOf="@+id/textView2"
+      app:layout_constraintTop_toBottomOf="@+id/SearchMinyan" />
+
+  <ImageButton
+      android:id="@+id/ClosestMinyan"
+      android:layout_width="113dp"
+      android:layout_height="56dp"
+      android:layout_marginEnd="20dp"
+      android:background="@color/white"
+      android:onClick="OnClick"
+      android:scaleType="fitCenter"
+      app:layout_constraintEnd_toStartOf="@+id/AddMinyan"
+      app:layout_constraintTop_toBottomOf="@+id/map_view"
+      app:srcCompat="@drawable/closest" />
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="76dp"
+      android:fontFamily="@font/ragil"
+      android:text="הראדר"
+      android:textColor="#588CAF"
+      android:textSize="16dp"
+      app:layout_constraintEnd_toStartOf="@+id/textView2"
+      app:layout_constraintTop_toBottomOf="@+id/ClosestMinyan" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

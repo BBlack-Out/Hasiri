@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="400dp"
+    android:layout_height="270dp"
+
+    android:layout_gravity="center_horizontal">
+    <TextView
+        android:id="@+id/Moed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="מנחה"
+        android:textSize="30dp"
+        android:textColor="#00D2FF"
+        android:fontFamily="@font/dati" />
+
+    <TextView
+        android:id="@+id/Signs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="נרשמו: ס/10"
+        android:fontFamily="@font/ragil"
+        android:textColor="@color/black"
+        android:textSize="21dp"
+        android:translationY="10dp"/>
+    <TextView
+        android:id="@+id/Time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="שעה: 00:00"
+        android:fontFamily="@font/ragil"
+        android:textColor="@color/black"
+        android:textSize="21dp"
+        android:translationY="20dp"/>
+    <TextView
+        android:id="@+id/Address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="כתובת: החייל הכובש 67"
+        android:fontFamily="@font/ragil"
+        android:textColor="@color/black"
+        android:textSize="21dp"
+        android:translationY="30dp"/>
+
+    <TextView
+        android:id="@+id/Heara"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/ragil"
+        android:text="הערה:"
+        android:textColor="#919191"
+        android:textSize="16dp"
+        android:translationY="40dp" />
+
+    <Button
+        android:id="@+id/SignTo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/ragil"
+        android:text="הירשם למניין"
+        android:textColor="@color/white"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        android:translationY="65dp" />
+
+
+</LinearLayout>

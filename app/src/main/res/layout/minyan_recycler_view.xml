@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp">
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="77dp"
+        android:layout_height="78dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/arvit_marker"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/signs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/ragil"
+        android:text="נרשמו: ס/10"
+        android:textColor="@color/black"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/image"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:fontFamily="@font/ragil"
+        android:text="שעה: 00 : 00"
+        android:textColor="@color/black"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/image"
+        app:layout_constraintTop_toBottomOf="@+id/signs" />
+
+    <TextView
+        android:id="@+id/address"
+        android:layout_width="220dp"
+        android:layout_height="23dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/ragil"
+        android:gravity="start"
+        android:text="כתובת: החייל הכובש 69"
+        android:textColor="@color/black"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/image"
+        app:layout_constraintTop_toBottomOf="@+id/time" />
+
+    <TextView
+        android:id="@+id/moed"
+        android:layout_width="48dp"
+        android:layout_height="19dp"
+        android:layout_marginEnd="22dp"
+        android:fontFamily="@font/dati"
+        android:gravity="center_horizontal"
+        android:text="(ערבית)"
+        android:textColor="#737373"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/image" />
+
+
+    <TextView
+        android:id="@+id/Distance"
+        android:layout_width="208dp"
+        android:layout_height="19dp"
+        android:layout_marginStart="110dp"
+        android:fontFamily="@font/ragil"
+        android:gravity="start"
+        android:text="250 מטר ממך"
+        android:textColor="#707070"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/address" />
+
+    <Button
+        android:id="@+id/Sign"
+        android:layout_width="86dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="16dp"
+        android:text="הירשם"
+        android:textColor="@color/white"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+    <Button
+        android:id="@+id/ShowOnMap"
+        android:layout_width="148dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="56dp"
+        android:text="הצג על המפה"
+        android:textColor="@color/white"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
