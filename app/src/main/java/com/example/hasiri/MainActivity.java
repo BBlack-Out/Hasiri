@@ -123,6 +123,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+        Calendar calendar = Calendar.getInstance();
+        Log.d("log","" + calendar.getTimeZone().getDisplayName());
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         getSupportActionBar().hide();
