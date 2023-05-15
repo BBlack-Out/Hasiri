@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SET_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -15,15 +19,42 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:stopWithTask="false"
         android:supportsRtl="false"
         android:theme="@style/Theme.Hasiri"
         tools:targetApi="31">
+
+        <service
+            android:name=".FireBaseMassegeService"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <activity
+            android:name=".Profil"
+            android:exported="false" />
         <activity
             android:name=".Radar"
             android:exported="false" />
         <activity
             android:name=".AddMinyan"
             android:exported="false" />
+
+        <receiver
+            android:name=".MyReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.hasiri.ACTION_NOTIFY" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".FireBaseMassegeService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -37,7 +68,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAqXkmG_HoZWOChbLOYx878l6Aosxe-j9Q" />
+            android:value="AIzaSyBB9IyDlsH61dve7xWwxrTn6-1ECiuc0Vc" />
 
         <activity
             android:name=".MainActivity"

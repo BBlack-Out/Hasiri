@@ -11,7 +11,7 @@ public class Minyan_model {
 
 
 
-    public Minyan_model(String signsUp, String time, String address, int image , LatLng latLng, String Distance, String id) {
+    public Minyan_model(String signsUp, String time, String address, int image , LatLng latLng, String Distance, String id ) {
         SignsUp = signsUp;
         Time = time;
         Address = address;

@@ -10,13 +10,15 @@ public class PublicPrayer implements Serializable {
     double lag;
     String Heara;
     static int i = 0;
-
+    String id;
     public PublicPrayer() {
 
     }
 
 
-    public PublicPrayer(int moed, double lat, double lag,int hour,int minute,String Heara) {
+
+
+    public PublicPrayer(int moed, double lat, double lag, int hour, int minute, String Heara , String id) {
         this.signUps = 0;
         this.moed = moed;
         this.lat = lat;
@@ -24,6 +26,7 @@ public class PublicPrayer implements Serializable {
         this.hour = hour;
         this.minute = minute;
         this.Heara = Heara;
+        this.id = id;
     }
 
     public double getLat() {
@@ -69,4 +72,11 @@ public class PublicPrayer implements Serializable {
 
     public String getHeara() {return Heara; }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

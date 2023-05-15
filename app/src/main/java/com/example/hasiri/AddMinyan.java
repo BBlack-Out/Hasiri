@@ -10,6 +10,7 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -18,9 +19,12 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,6 +54,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -70,7 +77,10 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
     SearchView mSearchView;
 
     FusedLocationProviderClient fusedLocationClient;
-
+    public static final String TPHILA_SIGHN = "sharedPrefs";
+    public static final String MOED = "moed";
+    public static final String IDs = "ID";
+    public static final String AUODIO = "AOUDIO";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,14 +168,53 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
 
     public void OnClick(View view)
     {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TPHILA_SIGHN, MODE_PRIVATE);
+
         if(view == Back)
+        {
             finish();
+            if(sharedPreferences.getBoolean(AUODIO,true))
+            {
+                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.click);
+                mediaPlayer.start();
+            }
+        }
+
         if(view == shaharitB)
         {
-            shaharitB.setBackgroundColor(Color.parseColor("#64dbf5"));
-            minhaB.setBackgroundColor(Color.parseColor("#E6E6E6"));
-            arvitB.setBackgroundColor(Color.parseColor("#E6E6E6"));
-            moed = 1;
+            Calendar calendar = Calendar.getInstance();
+            int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+            if(currentHour > 20 || currentHour < 12)
+            {
+                shaharitB.setBackgroundColor(Color.parseColor("#64dbf5"));
+                minhaB.setBackgroundColor(Color.parseColor("#E6E6E6"));
+                arvitB.setBackgroundColor(Color.parseColor("#E6E6E6"));
+                moed = 1;
+
+                if(hour != 0 || minute != 0)
+                {
+                    Toast.makeText(getApplicationContext(), "נא לבחור שעה עוד הפעם", Toast.LENGTH_SHORT).show();
+                    hour = 0;
+                    timeButton.setText("בחר שעה");
+                    TimeButtStr = "";
+                    if(sharedPreferences.getBoolean(AUODIO,true))
+                    {
+                        final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.error);
+                        mediaPlayer.start();
+                    }
+                }
+            }
+            else
+            {
+                Toast.makeText(getApplicationContext(), "אפשר ליצור מניין שחרית למחר רק החל מהשעה שמונה בערב", Toast.LENGTH_SHORT).show();
+                Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                vibrator.vibrate(100);
+                if(sharedPreferences.getBoolean(AUODIO,true))
+                {
+                    final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.error);
+                    mediaPlayer.start();
+                }
+            }
         }
         if(view == minhaB)
         {
@@ -173,6 +222,19 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
             shaharitB.setBackgroundColor(Color.parseColor("#E6E6E6"));
             arvitB.setBackgroundColor(Color.parseColor("#E6E6E6"));
             moed = 2;
+
+            if(hour != 0 || minute != 0)
+            {
+                Toast.makeText(getApplicationContext(), "נא לבחור שעה עוד הפעם", Toast.LENGTH_SHORT).show();
+                hour = 0;
+                timeButton.setText("בחר שעה");
+                TimeButtStr = "";
+                if(sharedPreferences.getBoolean(AUODIO,true))
+                {
+                    final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.error);
+                    mediaPlayer.start();
+                }
+            }
         }
         if(view == arvitB)
         {
@@ -180,13 +242,49 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
             shaharitB.setBackgroundColor(Color.parseColor("#E6E6E6"));
             minhaB.setBackgroundColor(Color.parseColor("#E6E6E6"));
             moed = 3;
+            if(hour != 0 || minute != 0)
+            {
+                Toast.makeText(getApplicationContext(), "נא לבחור שעה עוד הפעם", Toast.LENGTH_SHORT).show();
+                hour = 0;
+                timeButton.setText("בחר שעה");
+                TimeButtStr = "";
+                if(sharedPreferences.getBoolean(AUODIO,true))
+                {
+                    final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.error);
+                    mediaPlayer.start();
+                }
+            }
         }
         if(view == tzor)
         {
-            if(TimeButtStr != "" && latLng != null && moed != 0)
+            if(TimeButtStr != "" && latLng != null && moed != 0 && TimeButtStr != "00:00")
             {
-                Toast.makeText(getApplicationContext(), "מניין נוצר בהצלחה", Toast.LENGTH_SHORT).show();
-                SetInFireBace();
+                if(sharedPreferences.getString(MOED,"000").charAt(moed - 1) != '1')
+                {
+                    Toast.makeText(getApplicationContext(), "מניין נוצר בהצלחה", Toast.LENGTH_SHORT).show();
+                    if(sharedPreferences.getBoolean(AUODIO,true))
+                    {
+                        final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.beep_sign);
+                        mediaPlayer.start();
+                    }
+                    SetInFireBace();
+                }
+                else
+                {
+                    String moedStr = "";
+                    if(moed == 1)
+                        moedStr = "שחרית";
+                    if(moed == 2)
+                        moedStr = "מנחה";
+                    if(moed == 3)
+                        moedStr = "ערבית";
+                    Toast.makeText(getApplicationContext(),"נרשמת כבר למניין " + moedStr, Toast.LENGTH_SHORT).show();
+                    if(sharedPreferences.getBoolean(AUODIO,true))
+                    {
+                        final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.error);
+                        mediaPlayer.start();
+                    }
+                }
             }
             else
             {
@@ -199,92 +297,181 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
                 if(moed == 0)
                     Toast.makeText(getApplicationContext(), "יש לבחור תפילה", Toast.LENGTH_SHORT).show();
 
+                if(TimeButtStr == "00:00")
+                    Toast.makeText(getApplicationContext(), "אי אפשר ליצור מניין ב12 בלילה", Toast.LENGTH_SHORT).show();
             }
         }
         if(view == MyLocationB)
         {
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
                         @Override
-                        public void onSuccess(Location location) {
-
-                            if (location != null) {
-                                String addres;
-                                Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-                                List <Address> addresses;
-                                try {
-                                    addresses = geocoder.getFromLocation(location.getLatitude() ,location.getLongitude(), 1);
-                                    addres = addresses.get(0).getAddressLine(0);
-                                    mSearchView.setQuery(addres,true);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+                        public void run() {
+                            fusedLocationClient = LocationServices.getFusedLocationProviderClient(AddMinyan.this);
+                            if (ActivityCompat.checkSelfPermission(AddMinyan.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(AddMinyan.this
+                                    , Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                // TODO: Consider calling
+                                //    ActivityCompat#requestPermissions
+                                // here to request the missing permissions, and then overriding
+                                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                //                                          int[] grantResults)
+                                // to handle the case where the user grants the permission. See the documentation
+                                // for ActivityCompat#requestPermissions for more details.
+                                return;
                             }
-                            else
-                                Toast.makeText(getApplicationContext(), "אין אפשרות למצוא את מיקומך", Toast.LENGTH_SHORT).show();
+                            fusedLocationClient.getLastLocation()
+                                    .addOnSuccessListener(AddMinyan.this, new OnSuccessListener<Location>() {
+                                        @Override
+                                        public void onSuccess(Location location) {
+
+                                            if (location != null) {
+                                                String addres;
+                                                Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                                                List <Address> addresses;
+                                                try {
+                                                    addresses = geocoder.getFromLocation(location.getLatitude() ,location.getLongitude(), 1);
+                                                    addres = addresses.get(0).getAddressLine(0);
+                                                    mSearchView.setQuery(addres,true);
+                                                } catch (IOException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Toast.makeText(getApplicationContext(), "אין אפשרות למצוא את מיקומך", Toast.LENGTH_SHORT).show();
+                                                if(sharedPreferences.getBoolean(AUODIO,true))
+                                                {
+                                                    final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.error);
+                                                    mediaPlayer.start();
+                                                }
+                                            }
+                                        }
+                                    });
                         }
                     });
+
+                }}).start();
         }
     }
 
     public  void SetInFireBace()
     {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TPHILA_SIGHN, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference Ref = database.getReference("Minyan");
         DatabaseReference RefCounter = database.getReference("Counter");
-        publicPrayer = new PublicPrayer(moed,latLng.latitude,latLng.longitude,hour,minute,"" + heara.getText());
 
         RefCounter.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DataSnapshot> task) {
                 if(task.isSuccessful())
                 {
+
                     String Count = "" + task.getResult().getValue();
+                    publicPrayer = new PublicPrayer(moed,latLng.latitude,latLng.longitude,hour,minute,"" + heara.getText(),Count);
                     Ref.child(Count).setValue(publicPrayer);
+                    Ref.child(Count).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DataSnapshot> task) {
+                            if(task.isSuccessful()) {
+                                task.getResult().getRef().child("signUps").setValue((Long) task.getResult().child("signUps").getValue() + 1);
+                            }
+                        }
+                    });
                     int i = Integer.parseInt(Count);
                     i++;
                     RefCounter.setValue("" + i);
+
+                    StringBuilder strB = new StringBuilder(sharedPreferences.getString(MOED, "000"));
+                    strB.setCharAt(moed - 1,'1');
+                    editor.putString(MOED, strB.toString());
+
+                    editor.putString(IDs, SaveID(moed - 1 ,task.getResult().getValue().toString(),sharedPreferences.getString(IDs,"n,n,n,")));
+                    editor.apply();
                 }
             }
         });
-
        // ref.child("Minyan").child("" + ref2.getKey()).setValue(publicPrayer);
         finish();
     }
     public void popTimePicker(View view)
     {
-        TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TPHILA_SIGHN,MODE_PRIVATE);
+        if(moed != 0)
+        {
+            Calendar calendar = Calendar.getInstance();
+            int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+            int currentMinute = calendar.get(Calendar.MINUTE);
+
+            //Calendar.getInstance().getTime().getMinutes()
+
+            TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int SelectedHour, int SelectedMinute) {
-                hour = SelectedHour;
-                minute = SelectedMinute;
-
-                String HourStr = "" + hour;
-                if(hour / 10 < 1)
-                    HourStr = "0" + hour;
-                String MinuteStr = "" + minute;
-                if(minute / 10 < 1)
-                    MinuteStr = "0" + minute;
-
-                TimeButtStr = HourStr + " : " + MinuteStr;
-                timeButton.setText(TimeButtStr);
+               if(SelectedHour > currentHour || (SelectedHour == currentHour && SelectedMinute > currentMinute) || moed == 1)
+               {
+                   hour = SelectedHour;
+                   minute = SelectedMinute;
+                   String HourStr = "" + hour;
+                   if(hour / 10 < 1)
+                       HourStr = "0" + hour;
+                   String MinuteStr = "" + minute;
+                   if(minute / 10 < 1)
+                       MinuteStr = "0" + minute;
+                   TimeButtStr = HourStr + " : " + MinuteStr;
+                   timeButton.setText(TimeButtStr);
+               }
+               else
+               {
+                   if(SelectedHour == 0 && SelectedMinute == 0)
+                   {
+                       Toast.makeText(getApplicationContext(), "אי אפשר ליצור מניין לשעה 12 בלילה", Toast.LENGTH_SHORT).show();
+                   }
+                   else if(SelectedHour < currentHour ||(SelectedHour == currentHour && SelectedMinute < currentMinute) &&  moed !=1)
+                   {
+                       Toast.makeText(getApplicationContext(), "אי אפשר לבחור שעה שכבר עברה", Toast.LENGTH_SHORT).show();
+                       if(Calendar.getInstance().getTime().getHours() < 23)
+                           hour = Calendar.getInstance().getTime().getHours() + 1;
+                       else
+                           hour = 0;
+                       minute = Calendar.getInstance().getTime().getMinutes();
+                       String HourStr = "" + hour;
+                       if(hour / 10 < 1)
+                           HourStr = "0" + hour;
+                       String MinuteStr = "" + minute;
+                       if(minute / 10 < 1)
+                           MinuteStr = "0" + minute;
+                       TimeButtStr = HourStr + " : " + MinuteStr;
+                       timeButton.setText(TimeButtStr);
+                   }
+                   Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                   vibrator.vibrate(100);
+               }
             }
+
         };
-        int style = AlertDialog.THEME_HOLO_LIGHT;
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this,style,onTimeSetListener,hour,minute,true);
-        timePickerDialog.setTitle("בחר שעה");
-        timePickerDialog.show();
+            int style = AlertDialog.THEME_HOLO_LIGHT;
+            TimePickerDialog timePickerDialog = new TimePickerDialog(this,style,onTimeSetListener,hour,minute,true);
+            timePickerDialog.setTitle("בחר שעה");
+            timePickerDialog.show();
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(), "יש לבחור מועד קודם", Toast.LENGTH_SHORT).show();
+            if(sharedPreferences.getBoolean(AUODIO,true))
+            {
+                final MediaPlayer mediaPlayer = MediaPlayer.create(AddMinyan.this,R.raw.error);
+                mediaPlayer.start();
+            }
+            Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+            vibrator.vibrate(100);
+
+        }
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.P)
@@ -348,5 +535,35 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
+    }
+
+    public String SaveID(int num, String str, String shared) {
+        String[] nums = shared.split(",");
+        String resultStr = "";
+
+        if (num == 0) {
+            nums[0] = str;
+        } else if (num == 1) {
+            nums[nums.length/2] = str;
+        } else if (num == 2) {
+            nums[nums.length-1] = str;
+        } else {
+            return "";
+        }
+        for (String n : nums) {
+            resultStr += n + ",";
+        }
+        return resultStr.substring(0, resultStr.length()-1);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TPHILA_SIGHN,MODE_PRIVATE);
+        if(sharedPreferences.getBoolean(AUODIO,true))
+        {
+            final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.click);
+            mediaPlayer.start();
+        }
     }
 }

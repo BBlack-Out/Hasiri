@@ -1,6 +1,7 @@
 package com.example.hasiri;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
@@ -9,15 +10,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,10 +54,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class Radar extends AppCompatActivity {
 
@@ -71,7 +79,13 @@ public class Radar extends AppCompatActivity {
     List<Minyan_model> list;
     CheckBox shahritBox,minhaBox,arvitBox,hacolBox,closestBox;
 
+    public static final String TPHILA_SIGHN = "sharedPrefs";
+    public static final String MOED = "moed";
+    public static final String IDs = "ID";
+    public static final String AUODIO = "AOUDIO";
 
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,9 +106,9 @@ public class Radar extends AppCompatActivity {
         hacolBox = findViewById(R.id.HacolcheckBox);
         closestBox = findViewById(R.id.closestBox);
 
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TPHILA_SIGHN,MODE_PRIVATE);
 
-
-        MinyanAdapter adapter = new MinyanAdapter(Mlist, getApplicationContext(),this);
+        MinyanAdapter adapter = new MinyanAdapter(Mlist, getApplicationContext(),this,0);
         recyclerView.setAdapter(adapter);
 
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -108,7 +122,8 @@ public class Radar extends AppCompatActivity {
                     List<Address> addresses;
                     String address = "";
                     try {
-                        addresses = geocoder.getFromLocation(publicPrayer.getLat(), publicPrayer.getLag(), 1);
+                        addresses = geocoder.getFromLocation(publicPrayer.getLat(), publicPrayer.getLag(), 2);
+                        if(!addresses.isEmpty())
                         address = addresses.get(0).getAddressLine(0);
 
                     } catch (IOException e) {
@@ -139,13 +154,23 @@ public class Radar extends AppCompatActivity {
                 String finalHourStr = HourStr;
                 String finalMinuteStr = MinuteStr;
                 String finalAddress = address;
+
                 fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(Radar.this, new OnSuccessListener<Location>() {
                             @Override
                             public void onSuccess(Location location) {
+
+                                String finalTime = finalHourStr + " : " + finalMinuteStr;
+                                Calendar calendar = Calendar.getInstance();
+                                int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+                                int currentMinute = calendar.get(Calendar.MINUTE);
+                                if(publicPrayer.getHour() == currentHour && publicPrayer.getMinute() <= currentMinute && publicPrayer.getMinute() >= currentMinute + 4)
+                                {
+                                    finalTime = "התחיל";
+                                }
                                 MylatLng  = new LatLng(location.getLatitude(), location.getLongitude());
                                 int Distance = (int)getDistance(MylatLng,latLng);
-                                Mlist.add(new Minyan_model("נרשמו: 10 / " + publicPrayer.getSignUps(), finalHourStr + " : " + finalMinuteStr, finalAddress, publicPrayer.getMoed(),latLng, Distance + " מטר ממך","" + dataSnapshot.getKey()));
+                                Mlist.add(new Minyan_model("נרשמו: 10 / " + publicPrayer.getSignUps(), finalTime , finalAddress, publicPrayer.getMoed(),latLng, Distance + " מטר ממך","" + dataSnapshot.getKey()));
                                 adapter.notifyDataSetChanged();
                             }
                         });
@@ -154,11 +179,11 @@ public class Radar extends AppCompatActivity {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-                 int id = Integer.parseInt("" + dataSnapshot.getRef().getKey());
-                 PublicPrayer publicPrayer = dataSnapshot.getValue(PublicPrayer.class);
-                 Mlist.get(id).setSignsUp( "נרשמו: 10 / " + publicPrayer.getSignUps());
-                 Mlist.set(id,Mlist.get(id));
-                adapter.notifyDataSetChanged();
+//                 int id = Integer.parseInt("" + dataSnapshot.getRef().getKey());
+//                 PublicPrayer publicPrayer = dataSnapshot.getValue(PublicPrayer.class);
+//                 Mlist.get(id).setSignsUp( "נרשמו: 10 / " + publicPrayer.getSignUps());
+//                 Mlist.set(id,Mlist.get(id));
+//                 adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -224,7 +249,7 @@ public class Radar extends AppCompatActivity {
 
                                 list = sortMinyanByDistance(latLng1,list);
 
-                                MinyanAdapter adapter = new MinyanAdapter(list, getApplicationContext(), Radar.this);
+                                MinyanAdapter adapter = new MinyanAdapter(list, getApplicationContext(), Radar.this,0);
                                 recyclerView.setAdapter(adapter);
                             }
                             else
@@ -232,7 +257,7 @@ public class Radar extends AppCompatActivity {
                         }
                     });
         }
-        MinyanAdapter adapter = new MinyanAdapter(list, getApplicationContext(), this);
+        MinyanAdapter adapter = new MinyanAdapter(list, getApplicationContext(), this,0);
         recyclerView.setAdapter(adapter);
     }
 
@@ -279,9 +304,16 @@ public class Radar extends AppCompatActivity {
 
 
     public void OnClick(View view) throws IOException {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TPHILA_SIGHN,MODE_PRIVATE);
         if(view == Back)
         {
             finish();
+            if(sharedPreferences.getBoolean(AUODIO,true))
+            {
+                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.click);
+                mediaPlayer.start();
+            }
+
         }
         if(view == shahritBox)
         {
@@ -289,6 +321,11 @@ public class Radar extends AppCompatActivity {
             arvitBox.setChecked(false);
             hacolBox.setChecked(false);
             moed = 1;
+            if(sharedPreferences.getBoolean(AUODIO,true))
+            {
+                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
+                mediaPlayer.start();
+            }
         }
         if(view == minhaBox)
         {
@@ -296,6 +333,11 @@ public class Radar extends AppCompatActivity {
             arvitBox.setChecked(false);
             hacolBox.setChecked(false);
             moed = 2;
+            if(sharedPreferences.getBoolean(AUODIO,true))
+            {
+                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
+                mediaPlayer.start();
+            }
         }
         if(view == arvitBox)
         {
@@ -303,6 +345,11 @@ public class Radar extends AppCompatActivity {
             minhaBox.setChecked(false);
             hacolBox.setChecked(false);
             moed = 3;
+            if(sharedPreferences.getBoolean(AUODIO,true))
+            {
+                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
+                mediaPlayer.start();
+            }
         }
         if(view == hacolBox)
         {
@@ -310,14 +357,74 @@ public class Radar extends AppCompatActivity {
             minhaBox.setChecked(false);
             arvitBox.setChecked(false);
             moed = 0;
+            if(sharedPreferences.getBoolean(AUODIO,true))
+            {
+                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
+                mediaPlayer.start();
+            }
         }
         if(view == closestBox){
             if(closestBox.isChecked())
                 close = true;
             else
                 close = false;
+
+            if(sharedPreferences.getBoolean(AUODIO,true))
+            {
+                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
+                mediaPlayer.start();
+            }
         }
         setUpMinyanModeles(moed,close);
+    }
+
+    //לוקח ID משרד פרפרנסס. num לפי המועד - 1
+    public String getIDsave(int num)
+    {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TPHILA_SIGHN,MODE_PRIVATE);
+        String str = sharedPreferences.getString(IDs,"n,n,n");
+        String[] nums = str.split(",");
+
+        if (num == 2) {
+            return nums[nums.length-1];
+        } else if (num == 1) {
+            return nums[nums.length/2];
+        } else if (num == 0) {
+            return nums[0];
+        } else {
+            return "Invalid parameter. Must be 0, 1, or 2.";
+        }
+    }
+//מכניס ID משרד פרפרנסס. num לפי המועד - 1 , str הID של המניין שנבחר, shared זה השרד פרפרנסס של IDs
+
+    public String SaveID(int num, String str, String shared) {
+        String[] nums = shared.split(",");
+        String resultStr = "";
+
+        if (num == 0) {
+            nums[0] = str;
+        } else if (num == 1) {
+            nums[nums.length/2] = str;
+        } else if (num == 2) {
+            nums[nums.length-1] = str;
+        } else {
+            return "";
+        }
+        for (String n : nums) {
+            resultStr += n + ",";
+        }
+        return resultStr.substring(0, resultStr.length()-1);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        SharedPreferences sharedPreferences = getSharedPreferences(TPHILA_SIGHN,MODE_PRIVATE);
+        if(sharedPreferences.getBoolean(AUODIO,true))
+        {
+            final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.click);
+            mediaPlayer.start();
+        }
     }
 }
 
