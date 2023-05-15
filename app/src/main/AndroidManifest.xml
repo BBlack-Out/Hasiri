@@ -24,10 +24,7 @@
         android:theme="@style/Theme.Hasiri"
         tools:targetApi="31">
 
-        <service
-            android:name=".FireBaseMassegeService"
-            android:enabled="true"
-            android:exported="true"></service>
+
 
         <activity
             android:name=".Profil"
@@ -48,13 +45,6 @@
             </intent-filter>
         </receiver>
 
-        <service
-            android:name=".FireBaseMassegeService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -80,6 +70,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

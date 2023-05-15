@@ -30,7 +30,7 @@
         android:layout_marginTop="16dp"
         android:fontFamily="@font/ragil"
         android:gravity="center_horizontal"
-        android:text="הרדר "
+        android:text="הרדאר "
         android:textColor="@color/cyan"
         android:textSize="50dp"
         android:textStyle="bold"

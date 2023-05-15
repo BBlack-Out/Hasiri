@@ -143,25 +143,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ProfileB = findViewById(R.id.Profile);
 
 
-
-        // Set the desired time for the notification (in this example, 9:00 AM every day)
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 20);
-        calendar.set(Calendar.MINUTE, 49);
-        calendar.set(Calendar.SECOND, 0);
-
-        // Create a PendingIntent for the BroadcastReceiver
-        Intent intent = new Intent(this , MyReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-
-        // Schedule the PendingIntent to be triggered at the desired time
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-        Log.d("log", ""+calendar.getTime().toString());
-
-
         mSearchView = findViewById(R.id.search_view);
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

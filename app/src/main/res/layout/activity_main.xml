@@ -111,7 +111,7 @@
       android:layout_height="wrap_content"
       android:layout_marginEnd="76dp"
       android:fontFamily="@font/ragil"
-      android:text="הראדר"
+      android:text="הרדאר"
       android:textColor="#588CAF"
       android:textSize="16dp"
       app:layout_constraintEnd_toStartOf="@+id/textView2"
