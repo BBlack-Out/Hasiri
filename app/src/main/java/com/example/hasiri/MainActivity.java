@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         Calendar calendar = Calendar.getInstance();
-        Log.d("log","" + calendar.getTimeZone().getDisplayName());
+        Toast.makeText(MainActivity.this, calendar.getTimeZone().getDisplayName(), Toast.LENGTH_SHORT).show();
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         getSupportActionBar().hide();
@@ -143,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         AddMinyanB = findViewById(R.id.AddMinyan);
         RadarB = findViewById(R.id.ClosestMinyan);
         ProfileB = findViewById(R.id.Profile);
-
 
         mSearchView = findViewById(R.id.search_view);
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -181,7 +180,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Handle errors here
             }
         });
-
 
         mDatabase = database.getReference();
     }
@@ -281,8 +279,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
                 int currentMinute = calendar.get(Calendar.MINUTE);
 
-                if(publicPrayer.getHour() > currentHour || (publicPrayer.getHour() == currentHour && publicPrayer.getMinute() > currentMinute ) || (publicPrayer.getMoed() == 1 && (publicPrayer.getHour() < 12 || publicPrayer.getHour() > 20)))
+                if (publicPrayer.getHour() > currentHour || (publicPrayer.getHour() == currentHour && publicPrayer.getMinute() > currentMinute) || (publicPrayer.getMoed() == 1 && (currentHour > 20 || currentHour < 12)))
                 {
+
                     LatLng minyan = new LatLng(publicPrayer.getLat(), publicPrayer.getLag());
                     String addres = "";
                     Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
@@ -634,7 +633,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             String str = (String) address.getText();
                             if(address.getText().length() > 30)
                                 address.setTextSize(17);
-                            // address.setText(str.substring(0,30) + "...");
+                            if(address.getText().length() > 50)
+                            {address.setTextSize(15);
+                                address.setText(str.substring(0,50) + "...");
+                            }
                             Log.d("log", str);
 
                         } catch (IOException e) {
@@ -683,6 +685,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         mediaPlayer.start();
                                     }
 
+                                    Long minuteFire =(Long) task.getResult().child("minute").getValue();
+                                    Long hourFire =(Long) task.getResult().child("hour").getValue();
+                                    String minStr = "" + minuteFire;
+                                    String hourStr= "" + hourFire;
+                                    if(minuteFire / 10 < 1)
+                                        minStr = "0" + minuteFire;
+
+                                    if(hourFire / 10 < 1)
+                                        hourStr = "0" + hourFire;
+
+                                    int hour = p.getHour();
+                                    int minute = p.getMinute();
+                                    if(minute <= 15 && minute >= 10)
+                                        minute = 0;
+                                    else if(minute < 10)
+                                    {minute = 50; hour -= 1;}
+                                    else minute -= 10;
+                                    setAlarm(hour ,minute ,"מניין " + Moed.getText().toString(), "הינך נרשמת למניין " + Moed.getText().toString() + " בשעה " +minStr + " : " + hourStr + " ");
                                     Toast.makeText(MainActivity.this, "נרשמת בהצלחה למניין", Toast.LENGTH_SHORT).show();
                                 }
                                 else
@@ -798,5 +818,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             startActivityForResult(intent,REQUEST_CODE);
         }
     }
+
+    public void setAlarm(int hours, int minutes, String title, String notes) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, hours);
+        calendar.set(Calendar.MINUTE, minutes);
+        calendar.set(Calendar.SECOND, 0);
+        Log.d("log", hours +" : " + minutes);
+
+        long alarmTimeInMillis = calendar.getTimeInMillis();
+        int notificationId = (int) System.currentTimeMillis();
+
+        AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(getApplicationContext(), MyReceiver.class);
+        intent.putExtra("title", title);
+        intent.putExtra("notes", notes);
+        intent.putExtra("id", notificationId);
+
+        //saveAlarmsID.add(notificationId);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationId, intent, PendingIntent.FLAG_IMMUTABLE);
+        alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTimeInMillis, pendingIntent);
+    }
+
 }
 

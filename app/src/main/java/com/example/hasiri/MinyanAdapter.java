@@ -201,6 +201,12 @@ public class MinyanAdapter extends RecyclerView.Adapter<MinyanAdapter.Holder>{
                              Log.d("log", sharedPreferences.getString(MOED, "000"));
                              Log.d("log", sharedPreferences.getString(IDs, "n,n,n,"));
                              Toast.makeText(context, "ביטלת את הרשמתך למניין", Toast.LENGTH_SHORT).show();
+
+                             if(sharedPreferences.getBoolean(AUODIO,true))
+                             {
+                                 final MediaPlayer mediaPlayer = MediaPlayer.create(context,R.raw.un_sign);
+                                 mediaPlayer.start();
+                             }
                          }
                      }
                  });
