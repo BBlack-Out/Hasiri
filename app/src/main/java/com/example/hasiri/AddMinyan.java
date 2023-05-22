@@ -8,8 +8,12 @@ import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -392,11 +396,44 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
 
                     editor.putString(IDs, SaveID(moed - 1 ,task.getResult().getValue().toString(),sharedPreferences.getString(IDs,"n,n,n,")));
                     editor.apply();
+
+                    int hour = publicPrayer.getHour();
+                    int minute = publicPrayer.getMinute();
+                    if(minute <= 15)
+                    {
+                        int paar = 10 - minute;
+                        minute = 60 - paar;
+                        hour -= 1;
+                    }
+                    else
+                        minute -= 10;
+                    String moedStr = "";
+                    if(moed == 1)
+                        moedStr = "שחרית";
+                    if(moed == 2)
+                        moedStr = "מנחה";
+                    if(moed == 3)
+                        moedStr = "ערבית";
+
+                    String minStr = "" + publicPrayer.getMinute();
+                    String hourStr= "" + publicPrayer.getHour();
+                    if(publicPrayer.getMinute() / 10 < 1)
+                        minStr = "0" + publicPrayer.getMinute();
+                    if(publicPrayer.getHour() / 10 < 1)
+                        hourStr = "0" + publicPrayer.getHour();
+
+                    setAlarm(hour ,minute ,"מניין " + moedStr, "הינך נרשמת למניין " + moedStr  + " בשעה " + minStr + " : " + hourStr + " " ,Integer.parseInt(publicPrayer.getId()));
+                    setAlarm(publicPrayer.getHour() ,publicPrayer.getMinute() ,"מניין " + moedStr, "המניין " + moedStr +"שנרשמת אליו התחיל! ", Integer.parseInt(publicPrayer.getId()));
+
                 }
             }
         });
-       // ref.child("Minyan").child("" + ref2.getKey()).setValue(publicPrayer);
-        finish();
+        Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+
+        intent.putExtra("latLng", latLng);
+        intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
     public void popTimePicker(View view)
     {
@@ -555,6 +592,29 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
         }
         return resultStr.substring(0, resultStr.length()-1);
     }
+
+    public void setAlarm(int hours, int minutes, String title, String notes , int IDmoed) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, hours);
+        calendar.set(Calendar.MINUTE, minutes);
+        calendar.set(Calendar.SECOND, 0);
+        Log.d("log", hours +" : " + minutes);
+
+        long alarmTimeInMillis = calendar.getTimeInMillis();
+        int notificationId = (int) System.currentTimeMillis();
+
+        AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(getApplicationContext(), MyReceiver.class);
+        intent.putExtra("title", title);
+        intent.putExtra("notes", notes);
+        intent.putExtra("id", notificationId);
+
+        //saveAlarmsID.add(notificationId);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationId, intent, PendingIntent.FLAG_IMMUTABLE);
+        alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTimeInMillis, pendingIntent);
+    }
+
 
     @Override
     public void onBackPressed() {

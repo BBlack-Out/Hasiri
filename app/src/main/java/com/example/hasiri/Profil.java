@@ -7,6 +7,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -242,26 +246,7 @@ public class Profil extends AppCompatActivity {
             return "Invalid parameter. Must be 0, 1, or 2.";
         }
     }
-//מכניס ID משרד פרפרנסס. num לפי המועד - 1 , str הID של המניין שנבחר, shared זה השרד פרפרנסס של IDs
 
-    public String SaveID(int num, String str, String shared) {
-        String[] nums = shared.split(",");
-        String resultStr = "";
-
-        if (num == 0) {
-            nums[0] = str;
-        } else if (num == 1) {
-            nums[nums.length/2] = str;
-        } else if (num == 2) {
-            nums[nums.length-1] = str;
-        } else {
-            return "";
-        }
-        for (String n : nums) {
-            resultStr += n + ",";
-        }
-        return resultStr.substring(0, resultStr.length()-1);
-    }
     @Override
     public void onBackPressed() {
         super.onBackPressed();

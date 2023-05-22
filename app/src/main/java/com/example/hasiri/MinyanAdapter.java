@@ -4,7 +4,9 @@ import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.VIBRATOR_SERVICE;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -39,6 +41,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
 import java.nio.file.ClosedFileSystemException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -132,6 +135,7 @@ public class MinyanAdapter extends RecyclerView.Adapter<MinyanAdapter.Holder>{
                      @Override
                      public void onComplete(@NonNull Task<DataSnapshot> task) {
                          if(task.isSuccessful()) {
+                                 PublicPrayer publicPrayer = task.getResult().getValue(PublicPrayer.class);
                                  holder.Sign.setText("נרשמת");
                                  holder.Sign.setEnabled(false);
                                  holder.Sign.setBackgroundResource(R.drawable.signed_byn);
@@ -148,6 +152,36 @@ public class MinyanAdapter extends RecyclerView.Adapter<MinyanAdapter.Holder>{
                                      final MediaPlayer mediaPlayer = MediaPlayer.create(context,R.raw.beep_sign);
                                      mediaPlayer.start();
                                  }
+
+                                String minStr = "" + publicPrayer.getMinute();
+                                String hourStr= "" + publicPrayer.getHour();
+                                if(publicPrayer.getHour() / 10 < 1)
+                                    minStr = "0" + publicPrayer.getHour();
+
+                                if(publicPrayer.getMinute() / 10 < 1)
+                                    hourStr = "0" + publicPrayer.getMinute();
+
+                                int hour = publicPrayer.getHour();
+                                int minute = publicPrayer.getMinute();
+                                if(minute <= 15)
+                                {
+                                    int paar = 10 - minute;
+                                    minute = 60 - paar;
+                                    hour -= 1;
+                                }
+                                else
+                                    minute -= 15;
+
+                                String moedStr = "";
+                                if(publicPrayer.getMoed() == 1)
+                                    moedStr = "שחרית";
+                                if(publicPrayer.getMoed() == 2)
+                                    moedStr = "מנחה";
+                                if(publicPrayer.getMoed() == 3)
+                                    moedStr = "ערבית";
+
+                                setAlarm(hour ,minute ,"מניין " + moedStr, "הינך נרשמת למניין " + moedStr + " בשעה " +minStr + " : " + hourStr + " ", Integer.parseInt(publicPrayer.getId()));
+                                setAlarm(publicPrayer.getHour() ,publicPrayer.getMinute() ,"מניין " + moedStr, "המניין " + moedStr +" שנרשמת אליו התחיל! ", Integer.parseInt(publicPrayer.getId()));
                          }
                      }
                  });
@@ -192,6 +226,7 @@ public class MinyanAdapter extends RecyclerView.Adapter<MinyanAdapter.Holder>{
                      @Override
                      public void onComplete(@NonNull Task<DataSnapshot> task) {
                          if(task.isSuccessful()) {
+                             PublicPrayer publicPrayer = task.getResult().getValue(PublicPrayer.class);
                              task.getResult().getRef().child("signUps").setValue((Long) task.getResult().child("signUps").getValue() - 1);
                              StringBuilder strB = new StringBuilder(sharedPreferences.getString(MOED, "000"));
                              strB.setCharAt(i,'0');
@@ -207,6 +242,7 @@ public class MinyanAdapter extends RecyclerView.Adapter<MinyanAdapter.Holder>{
                                  final MediaPlayer mediaPlayer = MediaPlayer.create(context,R.raw.un_sign);
                                  mediaPlayer.start();
                              }
+                             cancelAlarmById(Integer.parseInt(publicPrayer.getId()));
                          }
                      }
                  });
@@ -285,5 +321,34 @@ public class MinyanAdapter extends RecyclerView.Adapter<MinyanAdapter.Holder>{
         } else {
             return "Invalid parameter. Must be 0, 1, or 2.";
         }
+    }
+
+    public void setAlarm(int hours, int minutes, String title, String notes , int IDmoed) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, hours);
+        calendar.set(Calendar.MINUTE, minutes);
+        calendar.set(Calendar.SECOND, 0);
+        Log.d("log", hours +" : " + minutes);
+
+        long alarmTimeInMillis = calendar.getTimeInMillis();
+        int notificationId = IDmoed;
+
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, MyReceiver.class);
+        intent.putExtra("title", title);
+        intent.putExtra("notes", notes);
+        intent.putExtra("id", notificationId);
+
+        //saveAlarmsID.add(notificationId);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, notificationId, intent, PendingIntent.FLAG_IMMUTABLE);
+        alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTimeInMillis, pendingIntent);
+    }
+    public void cancelAlarmById(int IDmoed) {
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, MyReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, IDmoed, intent, PendingIntent.FLAG_IMMUTABLE);
+        Log.d("log", "notification canceled" + IDmoed);
+        alarmMgr.cancel(pendingIntent);
     }
 }

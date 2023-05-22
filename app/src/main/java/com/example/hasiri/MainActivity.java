@@ -424,6 +424,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         editor.putString(MOED, strB.toString());
         editor.putString(IDs, SaveID(index , "n",sharedPreferences.getString(IDs,"n,n,n,")));
         editor.apply();
+        cancelAlarmById(Integer.parseInt(id));
         return false;
     }
 
@@ -697,12 +698,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                                     int hour = p.getHour();
                                     int minute = p.getMinute();
-                                    if(minute <= 15 && minute >= 10)
-                                        minute = 0;
-                                    else if(minute < 10)
-                                    {minute = 50; hour -= 1;}
-                                    else minute -= 10;
-                                    setAlarm(hour ,minute ,"מניין " + Moed.getText().toString(), "הינך נרשמת למניין " + Moed.getText().toString() + " בשעה " +minStr + " : " + hourStr + " ");
+                                    if(minute <= 15)
+                                    {
+                                        int paar = 15 - minute;
+                                        minute = 60 - paar;
+                                        hour -= 1;
+                                    }
+                                    else
+                                       minute -= 15;
+                                    setAlarm(hour ,minute ,"מניין " + Moed.getText().toString(), "הינך נרשמת למניין " + Moed.getText().toString() + " בשעה " +minStr + " : " + hourStr + " ", Integer.parseInt(p.getId()));
+                                    setAlarm(p.getHour() ,p.getMinute() ,"מניין " + Moed.getText().toString(), "המניין " + Moed.getText().toString() +" שנרשמת אליו התחיל! ", Integer.parseInt(p.getId()));
                                     Toast.makeText(MainActivity.this, "נרשמת בהצלחה למניין", Toast.LENGTH_SHORT).show();
                                 }
                                 else
@@ -819,7 +824,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void setAlarm(int hours, int minutes, String title, String notes) {
+    public void setAlarm(int hours, int minutes, String title, String notes , int IDmoed) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(Calendar.HOUR_OF_DAY, hours);
@@ -837,10 +842,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         intent.putExtra("id", notificationId);
 
         //saveAlarmsID.add(notificationId);
-
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationId, intent, PendingIntent.FLAG_IMMUTABLE);
         alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTimeInMillis, pendingIntent);
     }
-
+    public void cancelAlarmById(int IDmoed) {
+        AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, MyReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, IDmoed, intent, PendingIntent.FLAG_IMMUTABLE);
+        Log.d("log", "notification canceled " + IDmoed);
+        alarmMgr.cancel(pendingIntent);
+    }
 }
 
