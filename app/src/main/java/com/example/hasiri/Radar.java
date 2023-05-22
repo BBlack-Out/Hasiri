@@ -114,6 +114,7 @@ public class Radar extends AppCompatActivity {
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference ref = database.getReference("Minyan");
         ChildEventListener childEventListener = new ChildEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.P)
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
 
@@ -140,22 +141,27 @@ public class Radar extends AppCompatActivity {
 
                  LatLng latLng = new LatLng(publicPrayer.lat,publicPrayer.lag);
 
-                fusedLocationClient = LocationServices.getFusedLocationProviderClient(Radar.this);
-                if (ActivityCompat.checkSelfPermission(Radar.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Radar.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
+
                 String finalHourStr = HourStr;
                 String finalMinuteStr = MinuteStr;
                 String finalAddress = address;
 
-                fusedLocationClient.getLastLocation()
+
+
+                if(isGPSon())
+                {
+                    fusedLocationClient = LocationServices.getFusedLocationProviderClient(Radar.this);
+                    if (ActivityCompat.checkSelfPermission(Radar.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Radar.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }
+                    fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(Radar.this, new OnSuccessListener<Location>() {
                             @Override
                             public void onSuccess(Location location) {
@@ -174,8 +180,22 @@ public class Radar extends AppCompatActivity {
                                 adapter.notifyDataSetChanged();
                             }
                         });
-
                 }
+                else
+                {
+                    String finalTime = finalHourStr + " : " + finalMinuteStr;
+                    Calendar calendar = Calendar.getInstance();
+                    int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+                    int currentMinute = calendar.get(Calendar.MINUTE);
+                    if(publicPrayer.getHour() == currentHour && publicPrayer.getMinute() <= currentMinute && publicPrayer.getMinute() >= currentMinute + 4)
+                    {
+                        finalTime = "התחיל";
+                    }
+                    Mlist.add(new Minyan_model("נרשמו: 10 / " + publicPrayer.getSignUps(), finalTime , finalAddress, publicPrayer.getMoed(),latLng, "","" + dataSnapshot.getKey()));
+                    adapter.notifyDataSetChanged();
+                    closestBox.setEnabled(false);
+                }
+            }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
@@ -425,6 +445,18 @@ public class Radar extends AppCompatActivity {
             final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.click);
             mediaPlayer.start();
         }
+    }
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    private boolean isGPSon()
+    {
+        LocationManager locationManager = null;
+        boolean isON= false;
+        if(locationManager == null)
+        {
+            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        }
+        isON = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        return isON;
     }
 }
 

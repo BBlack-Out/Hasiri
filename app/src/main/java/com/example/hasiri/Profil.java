@@ -1,5 +1,6 @@
 package com.example.hasiri;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
@@ -17,7 +18,9 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -108,6 +111,7 @@ public class Profil extends AppCompatActivity {
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference ref = database.getReference("Minyan");
         ChildEventListener childEventListener = new ChildEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.P)
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
 
@@ -133,36 +137,46 @@ public class Profil extends AppCompatActivity {
 
                 LatLng latLng = new LatLng(publicPrayer.lat,publicPrayer.lag);
 
-                fusedLocationClient = LocationServices.getFusedLocationProviderClient(Profil.this);
-                if (ActivityCompat.checkSelfPermission(Profil.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Profil.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
+
                 String finalHourStr = HourStr;
                 String finalMinuteStr = MinuteStr;
                 String finalAddress = address;
-
-                fusedLocationClient.getLastLocation()
-                        .addOnSuccessListener(Profil.this, new OnSuccessListener<Location>() {
-                            @Override
-                            public void onSuccess(Location location) {
-                                MylatLng  = new LatLng(location.getLatitude(), location.getLongitude());
-                                int Distance = (int)getDistance(MylatLng,latLng);
-                                if(Objects.equals(getIDsave(publicPrayer.getMoed() - 1), dataSnapshot.getKey()))
-                                {
-                                    Mlist.add(new Minyan_model("נרשמו: 10 / " + publicPrayer.getSignUps(), finalHourStr + " : " + finalMinuteStr, finalAddress, publicPrayer.getMoed(),latLng, Distance + " מטר ממך","" + dataSnapshot.getKey()));
+                if(isGPSon())
+                {
+                    fusedLocationClient = LocationServices.getFusedLocationProviderClient(Profil.this);
+                    if (ActivityCompat.checkSelfPermission(Profil.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Profil.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }
+                    fusedLocationClient.getLastLocation()
+                            .addOnSuccessListener(Profil.this, new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location location) {
+                                    MylatLng  = new LatLng(location.getLatitude(), location.getLongitude());
+                                    int Distance = (int)getDistance(MylatLng,latLng);
+                                    if(Objects.equals(getIDsave(publicPrayer.getMoed() - 1), dataSnapshot.getKey()))
+                                    {
+                                        Mlist.add(new Minyan_model("נרשמו: 10 / " + publicPrayer.getSignUps(), finalHourStr + " : " + finalMinuteStr, finalAddress, publicPrayer.getMoed(),latLng, Distance + " מטר ממך","" + dataSnapshot.getKey()));
+                                    }
+                                    adapter.notifyDataSetChanged();
                                 }
-                                adapter.notifyDataSetChanged();
-                            }
-                        });
+                            });
+                }
+                else
+                {
+                    if(Objects.equals(getIDsave(publicPrayer.getMoed() - 1), dataSnapshot.getKey()))
+                    {
+                        Mlist.add(new Minyan_model("נרשמו: 10 / " + publicPrayer.getSignUps(), finalHourStr + " : " + finalMinuteStr, finalAddress, publicPrayer.getMoed(),latLng, "","" + dataSnapshot.getKey()));
+                    }
+                    adapter.notifyDataSetChanged();
+                }
             }
-
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
                 for(int i = 0; i < Mlist.size(); i++)
@@ -257,5 +271,18 @@ public class Profil extends AppCompatActivity {
             final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.click);
             mediaPlayer.start();
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    private boolean isGPSon()
+    {
+        LocationManager locationManager = null;
+        boolean isON= false;
+        if(locationManager == null)
+        {
+            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        }
+        isON = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        return isON;
     }
 }

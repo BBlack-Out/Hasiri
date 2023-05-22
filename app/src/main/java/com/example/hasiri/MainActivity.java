@@ -109,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     FusedLocationProviderClient fusedLocationClient;
 
+    private static final int request_CODE = 100;
+
     public static final String TPHILA_SIGHN = "sharedPrefs";
     public static final String MOED = "moed";
     public static final String IDs = "ID";
@@ -162,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         DatabaseReference ref = database.getReference("Minyan");
 
         ref.addValueEventListener(new ValueEventListener() {
+            //הכנסה של כל המניינים לרשימה ושליחה הרשימה לפונקציה שבודקת האם המיניין שהמשתמש רשום קיים
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
@@ -171,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 for(int i = 0; i < 3 ; i++)
                 {
                      if(sharedPreferences.getString(MOED,"000").charAt(i) == '1')
-                        Log.d("log", "" +checkIdInList(Plist , getIDsave(i), i));
+                        Log.d("log", "" + checkIdInList(Plist , getIDsave(i), i));
                 }
             }
 
@@ -180,11 +183,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Handle errors here
             }
         });
-
         mDatabase = database.getReference();
     }
 
-
+    //mSearchViewהפונקציה מחפשת את המיקום לפי הכתובת שהוכנסה ב
     private void searchAddress(String address) {
         new Thread(new Runnable() {
             @Override
@@ -208,8 +210,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if (addresses != null && !addresses.isEmpty()) {
                             Address foundAddress = addresses.get(0);
                             LatLng latLng = new LatLng(foundAddress.getLatitude(), foundAddress.getLongitude());
+                            //אנימציה שמראה את המיקום שהתקבל כפרמטר
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
-
                         }
                         else
                         {
@@ -222,22 +224,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
+//פונקציה בודקת האם יש הרשאה למיקום של המשתמש
     private void checkPremission() {
         Dexter.withContext(this).withPermission(Manifest.permission.ACCESS_FINE_LOCATION).withListener(new PermissionListener() {
             @Override
+            //יש הרשאה
             public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                Toast.makeText(MainActivity.this, "Permission is Granted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "הרשאה התקבלה", Toast.LENGTH_SHORT).show();
                 isPermissionGranted = true;
             }
-
+            //אין הרשאה ושליחה להגדרות האפליקציה ופתיחת הרשאה
             @Override
             public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                Uri uri = Uri.fromParts("package", getPackageName(), "");
-                intent.setData(uri);
-                startActivity(intent);
+
             }
 
             @Override
@@ -253,8 +252,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         boolean searchForMarker = false;
         mMap = googleMap;
         SharedPreferences sharedPreferences = getSharedPreferences(TPHILA_SIGHN,MODE_PRIVATE);
-
-
+        //בדיקת הרשאה למיקום
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -271,6 +269,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference ref = database.getReference("Minyan");
         ChildEventListener childEventListener = new ChildEventListener() {
+            // קבלה דל כל המיינים
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
                 PublicPrayer publicPrayer = dataSnapshot.getValue(PublicPrayer.class);
@@ -278,12 +277,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Calendar calendar = Calendar.getInstance();
                 int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
                 int currentMinute = calendar.get(Calendar.MINUTE);
-
+                //בדיקה האם המניין שהתקבל שעתו לא עברה כבר או שהמניין הוא שחרית ואז הוא ימחק בין השעות 12-20
                 if (publicPrayer.getHour() > currentHour || (publicPrayer.getHour() == currentHour && publicPrayer.getMinute() > currentMinute) || (publicPrayer.getMoed() == 1 && (currentHour > 20 || currentHour < 12)))
                 {
 
                     LatLng minyan = new LatLng(publicPrayer.getLat(), publicPrayer.getLag());
                     String addres = "";
+                    //יצירת String שמכיל את הכתובת לפי הlatlng של המניין
                     Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
                     List <Address> addresses;
                     try {
@@ -295,10 +295,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                     int i =0;
 
+                    //קיטלוג התמונה של המקרקר לפי סוג המניין
                     int height = 118   ;
                     int width = 118;
                     BitmapDrawable bitmapdraw = null;
-
                     if(publicPrayer.getMoed() == 1)
                     {bitmapdraw = (BitmapDrawable)getResources().getDrawable(R.drawable.sahrit_marker);}
                     if(publicPrayer.getMoed() == 2)
@@ -308,11 +308,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     Bitmap b = bitmapdraw.getBitmap();
                     Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
-
+                    //כל מרקר מקבל בtitle שלו את הid של המניין שעליו הוא מסמל. המספר זיהוי הזה יופיע בתחילת הסטרינג של הtitle
+                    //יצירת מרקר
                     Marker marker = mMap.addMarker(new MarkerOptions().position(minyan).icon(BitmapDescriptorFactory.fromBitmap(smallMarker)).title("m" + dataSnapshot.getKey() +") " + addres));
                 }
                 else
                 {
+                    //מחיקת המניין מהשמירה וגם מהענן
                     SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TPHILA_SIGHN, MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     if(Objects.equals(getIDsave(publicPrayer.getMoed() - 1), dataSnapshot.getKey()))
@@ -325,9 +327,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                     dataSnapshot.getRef().removeValue();
                 }
-
             }
-
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
 
@@ -337,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // A comment has changed, use the key to determine if we are displaying this
                 // comment and if so remove it.
                 String commentKey = dataSnapshot.getKey();
-                Log.d("log", dataSnapshot.getKey()+" deleted");
+                Log.d("log", dataSnapshot.getKey()+ " deleted");
                 mapView.getMapAsync(MainActivity.this);
             }
 
@@ -353,9 +353,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toast.makeText(MainActivity.this, "Map Loaded", Toast.LENGTH_SHORT).show();
 
 
-
         try {
-
+            // אם התקבל מ"הרדר" או מה"פרופיל" בקשה להראות את המרקר של המניין
             LatLng latLng = getIntent().getParcelableExtra("latLng");
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 20f));
             if(isGPSon())
@@ -369,6 +368,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         catch (Exception e){}
 
+        //אנימציית המפה זום למיקום המשתמש אם המיקום מופעל
         if(isGPSon() && !searchForMarker){
             mMap.setMyLocationEnabled(true);
 
@@ -440,7 +440,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         isON = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         return isON;
     }
-
+    //פונקציה שאחראית על הצגת דיאלוג למשתמש אשר תבקש ממנו להפעיל מיקום
     private void turnOnGps()
     {
         locationRequest = com.google.android.gms.location.LocationRequest.create();
@@ -458,6 +458,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
                 try {
+                    // קבלת התשובה מהבדיקת ההגדרות
                     LocationSettingsResponse response = task.getResult(ApiException.class);
                     Toast.makeText(MainActivity.this, "Gps IS ON", Toast.LENGTH_SHORT).show();
                 } catch (ApiException e) {
@@ -465,25 +466,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     switch (e.getStatusCode())
                     {
                         case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-
+                            // במקרה שההגדרות דורשות פתרון (הצגת דיאלוג להפעלת ה-GPS)
                             try {
                                 ResolvableApiException resolvableApiException= (ResolvableApiException) e;
                                 resolvableApiException.startResolutionForResult(MainActivity.this,REQUEST_CHECK_SETTING);
                             }
                             catch (IntentSender.SendIntentException ex) {
-
+                                // הצגת הדיאלוג נכשלה
                             }
                             break;
-
                         case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            // טיפול במקרה בו לא ניתן לשנות את ההגדרות
                             break;
-
                     }
                 }
             }
           });
     }
 
+    //תוצאות הדיאלוג שהופעל מהפונקציה turnOnGps
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -491,22 +492,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         {
             switch (resultCode){
                 case Activity.RESULT_OK:
-                    Toast.makeText(this, "GPS turned On", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "מיקום הופעל", Toast.LENGTH_SHORT).show();
                     mapView.getMapAsync(this);
                     break;
                 case Activity.RESULT_CANCELED:
-                    Toast.makeText(this, "GPS is requird be turned on", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "מומלץ להשתמש באפליקציה כאשר המיקום מופעל", Toast.LENGTH_SHORT).show();
             }
         }
-        if(requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK)
-        {
-            LatLng latLng = data.getParcelableExtra("latLng");
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
-            Log.d("loh", "hegia");
-
-        }
     }
-
+    //מעגל החיים של הfragment שמציד את המפה
     @Override
     protected void onStart() {
         super.onStart();
@@ -549,15 +543,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
+    //מאזין ללחיצות על המרקרים
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
-
-
         SharedPreferences sharedPreferences = getSharedPreferences(TPHILA_SIGHN,MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(MOED , "000");
         editor.putString(IDs , "n,n,n,");
 
+        //הוצאת המספר המזהה מהtitle של המרקר
         String id = "";
         for(int i = 0; i < marker.getTitle().length(); i++)
         {
@@ -566,181 +561,164 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             id = id + marker.getTitle().charAt(i);
         }
 
+        //הפעלת סאוונד
         if(sharedPreferences.getBoolean(AUODIO,true))
         {
             final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.click);
             mediaPlayer.start();
         }
 
-        if(id.charAt(0) == 'm')
-        {
-            id = id.substring(1);
-            Log.d("log", id);
-            mDatabase.child("Minyan").child(id).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DataSnapshot> task) {
-                    if(task.isSuccessful()) {
-                        PublicPrayer p = task.getResult().getValue(PublicPrayer.class);
-                        Dialog dialog = new Dialog(MainActivity.this);
-                        dialog.setContentView(R.layout.minyandialog);
-                        TextView Moed,Signs,time,address,heara;
-                        Button signTo;
-                        Moed = dialog.findViewById(R.id.Moed);
-                        Signs = dialog.findViewById(R.id.Signs);
-                        time = dialog.findViewById(R.id.Time);
-                        address = dialog.findViewById(R.id.Address);
-                        heara = dialog.findViewById(R.id.Heara);
-                        signTo = dialog.findViewById(R.id.SignTo);
+        id = id.substring(1);
+        Log.d("log", id);
+        //קבלת המניין מהענן לפי המספר המזהה שתהקבל
+        mDatabase.child("Minyan").child(id).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if(task.isSuccessful()) {
+                    PublicPrayer p = task.getResult().getValue(PublicPrayer.class);
+                    //הפעלת דיאלוג שמכיל את כל הפרטים של המניין
+                    Dialog dialog = new Dialog(MainActivity.this);
+                    dialog.setContentView(R.layout.minyandialog);
+                    TextView Moed,Signs,time,address,heara;
+                    Button signTo;
+                    Moed = dialog.findViewById(R.id.Moed);
+                    Signs = dialog.findViewById(R.id.Signs);
+                    time = dialog.findViewById(R.id.Time);
+                    address = dialog.findViewById(R.id.Address);
+                    heara = dialog.findViewById(R.id.Heara);
+                    signTo = dialog.findViewById(R.id.SignTo);
+                    Long moedFire = (Long) task.getResult().child("moed").getValue();
+                    if(moedFire == 1) Moed.setText("שחרית");
+                    else if(moedFire == 2) Moed.setText("מנחה");
+                    else Moed.setText("ערבית");
+                    Long signsFire = (Long) task.getResult().child("signUps").getValue();
+                    Signs.setText("נרשמו: 10/ " + signsFire);
+                    Long minuteFire =(Long) task.getResult().child("minute").getValue();
+                    Long hourFire =(Long) task.getResult().child("hour").getValue();
+                    String minStr = "" + minuteFire;
+                    String hourStr= "" + hourFire;
+                    if(minuteFire / 10 < 1)
+                        minStr = "0" + minuteFire;
+                    if(hourFire / 10 < 1)
+                        hourStr = "0" + hourFire;
+                    time.setText("שעה: "+minStr + " : " + hourStr);
+                    Calendar calendar = Calendar.getInstance();
 
-
-
-                        Long moedFire = (Long) task.getResult().child("moed").getValue();
-                        if(moedFire == 1) Moed.setText("שחרית");
-                        else if(moedFire == 2) Moed.setText("מנחה");
-                        else Moed.setText("ערבית");
-
-                        Long signsFire = (Long) task.getResult().child("signUps").getValue();
-                        Signs.setText("נרשמו: 10/ " + signsFire);
-
-                        Long minuteFire =(Long) task.getResult().child("minute").getValue();
-                        Long hourFire =(Long) task.getResult().child("hour").getValue();
-                        String minStr = "" + minuteFire;
-                        String hourStr= "" + hourFire;
-                        if(minuteFire / 10 < 1)
-                            minStr = "0" + minuteFire;
-
-                        if(hourFire / 10 < 1)
-                            hourStr = "0" + hourFire;
-
-                        time.setText("שעה: "+minStr + " : " + hourStr);
-
-                        Calendar calendar = Calendar.getInstance();
-                        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-                        int currentMinute = calendar.get(Calendar.MINUTE);
-
-                        if(p.getHour() == currentHour && p.getMinute() >= currentMinute && p.getMinute() <= currentMinute + 4)
-                        {
-                            time.setText("התחיל");
-                            time.setTypeface(null, Typeface.BOLD);
+                    int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+                    int currentMinute = calendar.get(Calendar.MINUTE);
+                    if(p.getHour() == currentHour && p.getMinute() >= currentMinute && p.getMinute() <= currentMinute + 4)
+                    {
+                        time.setText("התחיל");
+                        time.setTypeface(null, Typeface.BOLD);
+                    }
+                    double latFire = (double) task.getResult().child("lat").getValue();
+                    double lagFire = (double) task.getResult().child("lag").getValue();
+                    Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                    List <Address> addresses;
+                    try {
+                        addresses = geocoder.getFromLocation(latFire ,lagFire, 1);
+                        address.setText(addresses.get(0).getAddressLine(0));
+                        String str = (String) address.getText();
+                        if(address.getText().length() > 30)
+                            address.setTextSize(17);
+                        if(address.getText().length() > 50)
+                        {address.setTextSize(15);
+                            address.setText(str.substring(0,50) + "...");
                         }
+                        Log.d("log", str);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    String hearaFire = (String) task.getResult().child("heara").getValue();
+                    heara.setText(hearaFire);
 
-                        double latFire = (double) task.getResult().child("lat").getValue();
-                        double lagFire = (double) task.getResult().child("lag").getValue();
-                        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-                        List <Address> addresses;
-                        try {
-                            addresses = geocoder.getFromLocation(latFire ,lagFire, 1);
-                            address.setText(addresses.get(0).getAddressLine(0));
-                            String str = (String) address.getText();
-                            if(address.getText().length() > 30)
-                                address.setTextSize(17);
-                            if(address.getText().length() > 50)
-                            {address.setTextSize(15);
-                                address.setText(str.substring(0,50) + "...");
-                            }
-                            Log.d("log", str);
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        String hearaFire = (String) task.getResult().child("heara").getValue();
-                        heara.setText(hearaFire);
-
-                        int i = ((Long)task.getResult().child("moed").getValue()).intValue() - 1;
-
-                        if(Objects.equals(getIDsave(i), task.getResult().getKey()))
-                        {
-                            signTo.setText("נרשמת למניין");
-                            signTo.setEnabled(false);
-                            signTo.setBackgroundColor(Color.parseColor("#22f57e"));
-                        }
-
-                        signTo.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                int i = ((Long)task.getResult().child("moed").getValue()).intValue() - 1;
-                                if(sharedPreferences.getString(MOED,"000").charAt(i) != '1')
+                    //בדיקה האם נרשמת למניין הספציפי
+                    int i = ((Long)task.getResult().child("moed").getValue()).intValue() - 1;
+                    if(Objects.equals(getIDsave(i), task.getResult().getKey()))
+                    {
+                        signTo.setText("נרשמת למניין");
+                        signTo.setEnabled(false);
+                        signTo.setBackgroundColor(Color.parseColor("#22f57e"));
+                    }
+                    //מאזין לכפתור ההרשמה
+                    signTo.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            int i = ((Long)task.getResult().child("moed").getValue()).intValue() - 1;
+                            //בדיקה האם המשתמש כבר נרשם למניין מהסיג הזה
+                            if(sharedPreferences.getString(MOED,"000").charAt(i) != '1')
+                            {
+                                long signupFire = (Long) task.getResult().child("signUps").getValue();
+                                signupFire += 1;
+                                task.getResult().getRef().child("signUps").setValue((Long) task.getResult().child("signUps").getValue() + 1);
+                                Signs.setText("נרשמו: 10/ " + signupFire);
+                                signTo.setText("נרשמת למניין");
+                                signTo.setEnabled(false);
+                                signTo.setBackgroundColor(Color.parseColor("#22f57e"));
+                                //שמירות
+                                StringBuilder strB = new StringBuilder(sharedPreferences.getString(MOED, "000"));
+                                strB.setCharAt(i,'1');
+                                editor.putString(MOED, strB.toString());
+                                editor.putString(IDs, SaveID(i , task.getResult().getKey(),sharedPreferences.getString(IDs,"n,n,n,")));
+                                editor.apply();
+                                if(sharedPreferences.getBoolean(AUODIO,true))
                                 {
-                                    long signupFire = (Long) task.getResult().child("signUps").getValue();
-                                    signupFire += 1;
-
-                                    task.getResult().getRef().child("signUps").setValue((Long) task.getResult().child("signUps").getValue() + 1);
-
-                                    Signs.setText("נרשמו: 10/ " + signupFire);
-
-                                    signTo.setText("נרשמת למניין");
-                                    signTo.setEnabled(false);
-                                    signTo.setBackgroundColor(Color.parseColor("#22f57e"));
-
-                                    StringBuilder strB = new StringBuilder(sharedPreferences.getString(MOED, "000"));
-                                    strB.setCharAt(i,'1');
-                                    editor.putString(MOED, strB.toString());
-
-                                    editor.putString(IDs, SaveID(i , task.getResult().getKey(),sharedPreferences.getString(IDs,"n,n,n,")));
-                                    editor.apply();
-
-                                    if(sharedPreferences.getBoolean(AUODIO,true))
-                                    {
-                                        final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.beep_sign);
-                                        mediaPlayer.start();
-                                    }
-
-                                    Long minuteFire =(Long) task.getResult().child("minute").getValue();
-                                    Long hourFire =(Long) task.getResult().child("hour").getValue();
-                                    String minStr = "" + minuteFire;
-                                    String hourStr= "" + hourFire;
-                                    if(minuteFire / 10 < 1)
-                                        minStr = "0" + minuteFire;
-
-                                    if(hourFire / 10 < 1)
-                                        hourStr = "0" + hourFire;
-
-                                    int hour = p.getHour();
-                                    int minute = p.getMinute();
-                                    if(minute <= 15)
-                                    {
-                                        int paar = 15 - minute;
-                                        minute = 60 - paar;
-                                        hour -= 1;
-                                    }
-                                    else
-                                       minute -= 15;
-                                    setAlarm(hour ,minute ,"מניין " + Moed.getText().toString(), "הינך נרשמת למניין " + Moed.getText().toString() + " בשעה " +minStr + " : " + hourStr + " ", Integer.parseInt(p.getId()));
-                                    setAlarm(p.getHour() ,p.getMinute() ,"מניין " + Moed.getText().toString(), "המניין " + Moed.getText().toString() +" שנרשמת אליו התחיל! ", Integer.parseInt(p.getId()));
-                                    Toast.makeText(MainActivity.this, "נרשמת בהצלחה למניין", Toast.LENGTH_SHORT).show();
+                                    final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.beep_sign);
+                                    mediaPlayer.start();
+                                }
+                                //קבלת שעה כדי להפעיל התראה שתפעל 15 דק לפני המניין
+                                Long minuteFire =(Long) task.getResult().child("minute").getValue();
+                                Long hourFire =(Long) task.getResult().child("hour").getValue();
+                                String minStr = "" + minuteFire;
+                                String hourStr= "" + hourFire;
+                                if(minuteFire / 10 < 1)
+                                    minStr = "0" + minuteFire;
+                                if(hourFire / 10 < 1)
+                                    hourStr = "0" + hourFire;
+                                int hour = p.getHour();
+                                int minute = p.getMinute();
+                                if(minute <= 15)
+                                {
+                                    int paar = 15 - minute;
+                                    minute = 60 - paar;
+                                    hour -= 1;
                                 }
                                 else
+                                    minute -= 15;
+                                //הפעלת ההתראה
+                                setAlarm(hour ,minute ,"מניין " + Moed.getText().toString(), "הינך נרשמת למניין " + Moed.getText().toString() + " בשעה " +minStr + " : " + hourStr + " ", Integer.parseInt(p.getId()));
+                                setAlarm(p.getHour() ,p.getMinute() ,"מניין " + Moed.getText().toString(), "המניין " + Moed.getText().toString() +" שנרשמת אליו התחיל! ", Integer.parseInt(p.getId()));
+                                Toast.makeText(MainActivity.this, "נרשמת בהצלחה למניין", Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                            {
+                                //אם המשתמש נרשם כבר למניין מהסוג הזה
+                                i++;
+                                String moedStr = "";
+                                if(i == 1)
+                                    moedStr = "שחרית";
+                                if(i == 2)
+                                    moedStr = "מנחה";
+                                if(i == 3)
+                                    moedStr = "ערבית";
+                                Toast.makeText(MainActivity.this,"נרשמת כבר למניין " + moedStr, Toast.LENGTH_SHORT).show();
+                                Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
+                                vibrator.vibrate(100);
+                                if(sharedPreferences.getBoolean(AUODIO,true))
                                 {
-                                    i++;
-                                    String moedStr = "";
-                                    if(i == 1)
-                                        moedStr = "שחרית";
-                                    if(i == 2)
-                                        moedStr = "מנחה";
-                                    if(i == 3)
-                                        moedStr = "ערבית";
-                                    Toast.makeText(MainActivity.this,"נרשמת כבר למניין " + moedStr, Toast.LENGTH_SHORT).show();
-
-                                    Vibrator vibrator = (Vibrator) getApplicationContext().getSystemService(VIBRATOR_SERVICE);
-                                    vibrator.vibrate(100);
-
-                                    if(sharedPreferences.getBoolean(AUODIO,true))
-                                    {
-                                        final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.error);
-                                        mediaPlayer.start();
-                                    }
+                                    final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.error);
+                                    mediaPlayer.start();
                                 }
                             }
-                        });
-                        Log.d("log", sharedPreferences.getString(MOED, "000"));
-                        Log.d("log", sharedPreferences.getString(IDs, "n,n,n,"));
-
-                        dialog.show();
-                    }
+                        }
+                    });
+                    Log.d("log", sharedPreferences.getString(MOED, "000"));
+                    Log.d("log", sharedPreferences.getString(IDs, "n,n,n,"));
+                    dialog.show();
                 }
+            }
             });
-        }
+
         return false;
     }
 //לוקח ID משרד פרפרנסס. num לפי המועד - 1
@@ -760,8 +738,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return "Invalid parameter. Must be 0, 1, or 2.";
         }
     }
-//מכניס ID משרד פרפרנסס. num לפי המועד - 1 , str הID של המניין שנבחר, shared זה השרד פרפרנסס של IDs
 
+//מכניס ID משרד פרפרנסס. num לפי המועד - 1 , str הID של המניין שנבחר, shared זה השרד פרפרנסס של IDs
     public String SaveID(int num, String str, String shared) {
         String[] nums = shared.split(",");
         String resultStr = "";
@@ -781,13 +759,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return resultStr.substring(0, resultStr.length()-1);
     }
 
-
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
     public void OnClick(View view)
     {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TPHILA_SIGHN,MODE_PRIVATE);
@@ -798,12 +769,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.click);
                 mediaPlayer.start();
             }
+            //העברה למסך הסופת מניין
             Intent intent = new Intent(getApplicationContext(),AddMinyan.class);
             startActivity(intent);
         }
         if(view == RadarB)
         {
-
+            //העברה למסך הראדר
             if(sharedPreferences.getBoolean(AUODIO,true))
             {
                 final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.click);
@@ -819,11 +791,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.click);
                 mediaPlayer.start();
             }
+            //העברה למסך הפרופיל
             Intent intent = new Intent(getApplicationContext(),Profil.class);
             startActivityForResult(intent,REQUEST_CODE);
         }
     }
-
+    //פונקציה אשר אחראית על הפעלת התראה שמקבלת פרמטרים ולפיהם מפעילה את ההתראה
     public void setAlarm(int hours, int minutes, String title, String notes , int IDmoed) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
@@ -839,12 +812,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Intent intent = new Intent(getApplicationContext(), MyReceiver.class);
         intent.putExtra("title", title);
         intent.putExtra("notes", notes);
-        intent.putExtra("id", notificationId);
+        intent.putExtra("id", IDmoed);
 
         //saveAlarmsID.add(notificationId);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationId, intent, PendingIntent.FLAG_IMMUTABLE);
         alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTimeInMillis, pendingIntent);
     }
+
+    //פונקציה אשר אחראית על ביטול ההתראה שמקבלת פרמטר ולפיה מבטלת את ההתראה
     public void cancelAlarmById(int IDmoed) {
         AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, MyReceiver.class);
