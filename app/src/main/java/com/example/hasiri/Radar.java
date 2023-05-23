@@ -116,9 +116,11 @@ public class Radar extends AppCompatActivity {
         ChildEventListener childEventListener = new ChildEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.P)
             @Override
+            //קבלה של כל המניינים והצגה שלהם בריסייקל ויוו
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
 
                     PublicPrayer publicPrayer = dataSnapshot.getValue(PublicPrayer.class);
+                // הכנסה של הכתובת על פי מיקום
                     Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
                     List<Address> addresses;
                     String address = "";
@@ -130,7 +132,7 @@ public class Radar extends AppCompatActivity {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
+                //הצגת שעה
                     String HourStr = "" + publicPrayer.getHour();
                     if (publicPrayer.getHour() / 10 < 1)
                         HourStr = "0" + publicPrayer.getHour();
@@ -141,13 +143,11 @@ public class Radar extends AppCompatActivity {
 
                  LatLng latLng = new LatLng(publicPrayer.lat,publicPrayer.lag);
 
-
                 String finalHourStr = HourStr;
                 String finalMinuteStr = MinuteStr;
                 String finalAddress = address;
 
-
-
+                //קבלת אישור לשימוש במיקום המשתמש ובדיקה האם הGPS פעיל כדי להציג את מרחק המניין מהמשתמש
                 if(isGPSon())
                 {
                     fusedLocationClient = LocationServices.getFusedLocationProviderClient(Radar.this);
@@ -161,6 +161,7 @@ public class Radar extends AppCompatActivity {
                         // for ActivityCompat#requestPermissions for more details.
                         return;
                     }
+                    //לאחר שיש אישור למיקום קבלה שלו
                     fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(Radar.this, new OnSuccessListener<Location>() {
                             @Override
@@ -176,6 +177,7 @@ public class Radar extends AppCompatActivity {
                                 }
                                 MylatLng  = new LatLng(location.getLatitude(), location.getLongitude());
                                 int Distance = (int)getDistance(MylatLng,latLng);
+                                //הוספה של המניין
                                 Mlist.add(new Minyan_model("נרשמו: 10 / " + publicPrayer.getSignUps(), finalTime , finalAddress, publicPrayer.getMoed(),latLng, Distance + " מטר ממך","" + dataSnapshot.getKey()));
                                 adapter.notifyDataSetChanged();
                             }
@@ -183,6 +185,7 @@ public class Radar extends AppCompatActivity {
                 }
                 else
                 {
+                    //אם הGPS לא פועל אז המניין מתווסף ללא המרחק
                     String finalTime = finalHourStr + " : " + finalMinuteStr;
                     Calendar calendar = Calendar.getInstance();
                     int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -199,11 +202,7 @@ public class Radar extends AppCompatActivity {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-//                 int id = Integer.parseInt("" + dataSnapshot.getRef().getKey());
-//                 PublicPrayer publicPrayer = dataSnapshot.getValue(PublicPrayer.class);
-//                 Mlist.get(id).setSignsUp( "נרשמו: 10 / " + publicPrayer.getSignUps());
-//                 Mlist.set(id,Mlist.get(id));
-//                 adapter.notifyDataSetChanged();
+
             }
 
             @Override
@@ -224,7 +223,7 @@ public class Radar extends AppCompatActivity {
         ref.addChildEventListener(childEventListener);
     }
 
-
+    //פונקציה שמסדרת את רשימת המניינים לפי הפרמטר שהתקבל. אם moed = 1 הוא יציג רק מנייני שחרית, אם moed = 2 הוא יציג רק מנייני מנחה, אם moed = 3 הוא יציג רק מנייני ערבית. אם close = true הוא יסדר אותם מהקרוב לרחוק
     private void setUpMinyanModeles(int moed, boolean close) throws IOException {
 
         mDatabase.child("Counter").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
@@ -248,6 +247,7 @@ public class Radar extends AppCompatActivity {
         }
         if(close == true)
         {
+            //בדיקת הרשאה למיקום
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -259,6 +259,7 @@ public class Radar extends AppCompatActivity {
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
+            //קבלת מיקום של המשתמש
             fusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                         @Override
@@ -268,7 +269,6 @@ public class Radar extends AppCompatActivity {
                                 LatLng latLng1= new LatLng(location.getLatitude(),location.getLongitude());
 
                                 list = sortMinyanByDistance(latLng1,list);
-
                                 MinyanAdapter adapter = new MinyanAdapter(list, getApplicationContext(), Radar.this,0);
                                 recyclerView.setAdapter(adapter);
                             }
@@ -281,9 +281,8 @@ public class Radar extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-
+    // פונקציה שמקבלת את מיקום המשתמש ואת כל המניינים וומסדרת את הרשימה לפי הסדרא מהקרוב לרחוק
     public static List<Minyan_model> sortMinyanByDistance(LatLng target, List<Minyan_model> minyanList) {
-        // Define a Comparator to compare the distance between two Minyan_model objects and the target LatLng
 
         Comparator<Minyan_model> distanceComparator = new Comparator<Minyan_model>() {
             @Override
@@ -296,15 +295,13 @@ public class Radar extends AppCompatActivity {
                 return Double.compare(m1Distance, m2Distance);
             }
         };
-
-        // Sort the minyanList using the distanceComparator
         Collections.sort(minyanList, distanceComparator);
 
         // Return the sorted list
         return minyanList;
 
     }
-
+    //פונקציה שמחזירה מרחק בין שני נקודות על המפה
     private static double getDistance(LatLng p1, LatLng p2) {
         final int R = 6371000; // Earth radius in meters
         double lat1 = p1.latitude;
@@ -317,7 +314,6 @@ public class Radar extends AppCompatActivity {
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        Log.d("loh", "" + R * c);
         return R * c;
     }
 
@@ -341,11 +337,7 @@ public class Radar extends AppCompatActivity {
             arvitBox.setChecked(false);
             hacolBox.setChecked(false);
             moed = 1;
-            if(sharedPreferences.getBoolean(AUODIO,true))
-            {
-                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
-                mediaPlayer.start();
-            }
+
         }
         if(view == minhaBox)
         {
@@ -353,11 +345,6 @@ public class Radar extends AppCompatActivity {
             arvitBox.setChecked(false);
             hacolBox.setChecked(false);
             moed = 2;
-            if(sharedPreferences.getBoolean(AUODIO,true))
-            {
-                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
-                mediaPlayer.start();
-            }
         }
         if(view == arvitBox)
         {
@@ -365,11 +352,6 @@ public class Radar extends AppCompatActivity {
             minhaBox.setChecked(false);
             hacolBox.setChecked(false);
             moed = 3;
-            if(sharedPreferences.getBoolean(AUODIO,true))
-            {
-                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
-                mediaPlayer.start();
-            }
         }
         if(view == hacolBox)
         {
@@ -377,11 +359,6 @@ public class Radar extends AppCompatActivity {
             minhaBox.setChecked(false);
             arvitBox.setChecked(false);
             moed = 0;
-            if(sharedPreferences.getBoolean(AUODIO,true))
-            {
-                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
-                mediaPlayer.start();
-            }
         }
         if(view == closestBox){
             if(closestBox.isChecked())
@@ -389,12 +366,15 @@ public class Radar extends AppCompatActivity {
             else
                 close = false;
 
-            if(sharedPreferences.getBoolean(AUODIO,true))
-            {
-                final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
-                mediaPlayer.start();
-            }
+
         }
+
+        if(sharedPreferences.getBoolean(AUODIO,true))
+        {
+            final MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.check_box);
+            mediaPlayer.start();
+        }
+        //שליחת פרמטרים לפונקציה שאחראית לסידור רשימת המניינים
         setUpMinyanModeles(moed,close);
     }
 
@@ -415,8 +395,8 @@ public class Radar extends AppCompatActivity {
             return "Invalid parameter. Must be 0, 1, or 2.";
         }
     }
-//מכניס ID משרד פרפרנסס. num לפי המועד - 1 , str הID של המניין שנבחר, shared זה השרד פרפרנסס של IDs
 
+//מכניס ID משרד פרפרנסס. num לפי המועד - 1 , str הID של המניין שנבחר, shared זה השרד פרפרנסס של IDs
     public String SaveID(int num, String str, String shared) {
         String[] nums = shared.split(",");
         String resultStr = "";

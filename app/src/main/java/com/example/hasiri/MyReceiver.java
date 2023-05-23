@@ -23,7 +23,7 @@ public class MyReceiver extends BroadcastReceiver {
         String notes = intent.getStringExtra("notes");
         int id = intent.getIntExtra("id", 0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.icon)
+                .setSmallIcon(R.drawable.profil)
                 .setContentTitle(title)
                 .setContentText(notes)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);

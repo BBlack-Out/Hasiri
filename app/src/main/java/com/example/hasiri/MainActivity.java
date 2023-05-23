@@ -819,7 +819,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         alarmMgr.set(AlarmManager.RTC_WAKEUP, alarmTimeInMillis, pendingIntent);
     }
 
-    //פונקציה אשר אחראית על ביטול ההתראה שמקבלת פרמטר ולפיה מבטלת את ההתראה
+    //פונקציה אשר אחראית על ביטול ההתראה שמקבלת פרמטר מספר זיהוי ולפיו מבטלת את ההתראה
     public void cancelAlarmById(int IDmoed) {
         AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, MyReceiver.class);
