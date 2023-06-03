@@ -376,7 +376,9 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
                 {
 
                     String Count = "" + task.getResult().getValue();
-                    publicPrayer = new PublicPrayer(moed,latLng.latitude,latLng.longitude,hour,minute,"" + heara.getText(),Count);
+                    String hearaText = heara.getText().toString();
+                    String Heara = hearaText.replaceAll("\\r?\\n", " ");
+                    publicPrayer = new PublicPrayer(moed,latLng.latitude,latLng.longitude,hour,minute,Heara,Count);
                     Ref.child(Count).setValue(publicPrayer);
                     Ref.child(Count).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
                         @Override

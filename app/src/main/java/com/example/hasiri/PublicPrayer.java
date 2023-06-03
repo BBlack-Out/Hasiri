@@ -5,11 +5,9 @@ import java.io.Serializable;
 public class PublicPrayer implements Serializable {
     public int signUps;
     int moed,hour,minute;
-    //int Time;
     double lat;
     double lag;
     String Heara;
-    static int i = 0;
     String id;
     public PublicPrayer() {
 
