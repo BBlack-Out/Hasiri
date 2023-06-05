@@ -173,7 +173,8 @@ public class Radar extends AppCompatActivity {
                                 int currentMinute = calendar.get(Calendar.MINUTE);
                                 if(publicPrayer.getHour() == currentHour && publicPrayer.getMinute() <= currentMinute && publicPrayer.getMinute() >= currentMinute + 4)
                                 {
-                                    finalTime = "התחיל";
+
+                                    finalTime = "התחיל " + "(" +finalTime+ ")";
                                 }
                                 MylatLng  = new LatLng(location.getLatitude(), location.getLongitude());
                                 int Distance = (int)getDistance(MylatLng,latLng);

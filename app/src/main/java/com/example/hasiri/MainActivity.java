@@ -608,7 +608,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     int currentMinute = calendar.get(Calendar.MINUTE);
                     if(p.getHour() == currentHour && p.getMinute() >= currentMinute && p.getMinute() <= currentMinute + 4)
                     {
-                        time.setText("התחיל");
+                        time.setText("התחיל " + "("  + minStr + " : " + hourStr + ")");
                         time.setTypeface(null, Typeface.BOLD);
                     }
                     double latFire = (double) task.getResult().child("lat").getValue();
