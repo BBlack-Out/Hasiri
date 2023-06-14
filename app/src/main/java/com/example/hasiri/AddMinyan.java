@@ -487,6 +487,10 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
                        TimeButtStr = HourStr + " : " + MinuteStr;
                        timeButton.setText(TimeButtStr);
                    }
+                    else if(SelectedHour >= 23)
+                   {
+                       Toast.makeText(getApplicationContext(), "אי אפשר ליצור מניין לאחרי השעה 11 בערב.", Toast.LENGTH_SHORT).show();
+                   }
                    Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
                    vibrator.vibrate(100);
                }
