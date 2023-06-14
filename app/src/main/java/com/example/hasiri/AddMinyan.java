@@ -451,7 +451,7 @@ public class AddMinyan extends AppCompatActivity implements OnMapReadyCallback {
             TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int SelectedHour, int SelectedMinute) {
-               if(SelectedHour > currentHour || (SelectedHour == currentHour && SelectedMinute > currentMinute) || moed == 1)
+               if(((SelectedHour > currentHour || (SelectedHour == currentHour && SelectedMinute > currentMinute)) && SelectedHour < 23) || moed == 1)
                {
                    hour = SelectedHour;
                    minute = SelectedMinute;
